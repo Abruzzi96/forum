@@ -1,12 +1,11 @@
 //// WILL  DO ////<br />
 <br />
--- dockerize eklenecek --<br />
+CSS
 <br />
 <br />
-//// WILL IMPROVE ////<br />
+//// MIGHT IMPROVE ////<br />
 -- konularda vote degistirilemiyo comments gibi<br />
 ?? guest yorum yapmaya calistiginda izin verilmiyo no error handle<br />
-?? CSS ??<br />
 -- yeni konular ustten bastirilicak --<br /><br />
 <br />
 //// CHECK ////<br />
