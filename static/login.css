@@ -1,0 +1,82 @@
+/* static/login.css */
+
+body {
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+  color: #f0f0f0;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  max-width: 400px; /* Max genişlik ayarı */
+  width: 100%;
+}
+
+h1 {
+  font-size: 2.5em;
+  color: #e0e0e0;
+  text-shadow: 2px 2px #000;
+  margin-bottom: 60px; /* Başlık alt boşluk */
+  background-image: url('user.jpg'); /* Fotoğraf URL'si */
+  background-size: center;
+  background-position: center;
+  padding: 80px;
+  border-radius: 10px;
+  margin-right: 40px;
+  width: 27%;
+  height: 300px; /* Fotoğrafın görüneceği yükseklik */
+  margin-top: 40px;
+}
+
+
+
+form {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 60px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    margin-left: 50px;
+}
+
+label {
+  margin: 10px 0 5px 0;
+  font-size: 1.2em;
+}
+
+input {
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+}
+
+button {
+  background-color: #3a7bd5;
+  color: white;
+  padding: 15px 32px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+  background-color: #2e5c99;
+  transform: translateY(-2px);
+}

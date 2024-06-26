@@ -1,0 +1,134 @@
+
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    margin-left: 80px;
+}
+
+h1, h2, h3 {
+    color: #1a1a1a;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+    margin-left: 80px;
+}
+
+p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    margin-left: 80px;
+}
+
+form {
+    margin-bottom: 20px;
+    display: grid;
+    gap: 10px;
+    margin-left: 80px;
+}
+
+form input[type="text"],
+form textarea,
+form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 80%;
+    box-sizing: border-box;
+    margin-left: 80px;
+}
+
+form input[type="text"],
+form textarea {
+    grid-column: span 1; /* Başlık ve açıklama alanları iki sütunu kaplar */
+}
+
+form select {
+    width: 80%; /* Kategori seçim alanı genişliği hesaplanmış kenarlıkları dahil etmek için */
+    margin-left: 80px;
+}
+
+button {
+    background-color: #3a7bd5;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+    width: 80%; /* Create Thread butonu diğer form alanlarına eşit genişlikte olacak */
+    margin-left: 80px;
+}
+
+button:hover {
+    background-color: #2e5c99;
+    transform: translateY(-2px);
+}
+
+.user-info-box {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    margin-left: 80px;
+    width: calc(90% - 160px);
+}
+
+.threads-list-box {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    margin-left: 80px;
+    width: calc(90% - 160px);
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc; /* Çizgi rengi ve kalınlığını isteğinize göre ayarlayabilirsiniz */
+    padding-bottom: 10px; /* İsteğe bağlı olarak çizgi altındaki boşluk ayarlanabilir */
+}
+
+a {
+    color: #3a7bd5;
+    text-decoration: none;
+    margin-right: 80px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+.action-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.action-buttons a {
+    display: inline-block;
+    background-color: #3a7bd5;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.action-buttons a:hover {
+    background-color: #2e5c99;
+    transform: translateY(-2px);
+}
