@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>{{.Thread.Title}}</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/thread.css">
 </head>
 <body>
     <h1>{{.Thread.Title}}</h1>
-    <p>Created by: {{.Username}}</p>
+    <p>Oluşturan: {{.Username}}</p>
     <p>{{.Thread.Description}}</p>
-    <h3>Categories:</h3>
+    <h3>Kategoriler:</h3>
     <ul>
         {{ range .Categories }}
         <li>{{ . }}</li>
         {{ end }}
     </ul>
-    <h2>Comments</h2>
+    <h2>Yorumlar</h2>
     {{range .Comments}}
     <div>
         <p>{{.Content}} - by {{.Username}}</p>
@@ -32,9 +32,9 @@
     <!-- Comment Form -->
     <form method="post" action="/comment" aria-label="Post a comment">
         <input type="hidden" name="thread_id" value="{{.Thread.ID}}">
-        <label for="comment" class="visually-hidden">Write a comment</label>
+        <label for="comment" class="visually-hidden">Yorum Yap</label>
         <textarea id="comment" name="comment" placeholder="Write a comment..." required></textarea>
-        <button type="submit">Post Comment</button>
+        <button type="submit">Yorumu Paylaş</button>
     </form>
 
     <div aria-live="polite" aria-atomic="true">

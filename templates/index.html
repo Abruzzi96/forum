@@ -1,20 +1,19 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Kullanıcı Profili</title>
+    <link rel="stylesheet" href="/static/index.css">
 </head>
 <body>
-    <h1>User Profile</h1>
-    <p>Welcome, {{.Username}}!</p>
+    <h1>Ana Sayfa</h1>
+    <p>Hoşgeldin, {{.Username}}!</p>
 
 {{if not .IsGuest}}
 <form method="post" action="/create-thread">
     <input type="text" name="title" placeholder="Thread Title" required>
     <textarea name="description" placeholder="Thread Description" required></textarea>
-    <select name="categories" multiple required>
+    <select name="Kategoriler" multiple required>
         <option value="1">Technology</option>
         <option value="2">Health</option>
         <option value="3">Science</option>
@@ -22,7 +21,6 @@
     </select>
     <button type="submit">Create Thread</button>
 </form>
-<a href="/messages">Messages</a>
 {{end}}
 <h2>Threads</h2>
 <form action="/index" method="get">
@@ -43,11 +41,24 @@
 
     <button type="submit">Apply Filters</button>
 </form>
-<ul>
-    {{range .Threads}}
-    <li><a href="/thread?id={{.ID}}">{{.Title}}</a> - {{.Description}}</li>
-    {{end}}
-</ul>
+<div class="user-info-box">
+    <p><strong>Username:</strong> {{.Username}}</p>
+    <!-- Buraya profil resmi eklenebilir -->
+</div>
+
+<div class="threads-list-box">
+    <h3>Threads</h3>
+    <ul>
+        {{range .Threads}}
+        <li><a href="/thread?id={{.ID}}">{{.Title}}</a> - {{.Description}}</li>
+        {{end}}
+    </ul>
+</div>
+
+<div class="action-buttons">
+    <a href="/messages">Messages</a>
     <a href="/logout">Logout</a>
+</div>
+
 </body>
 </html>

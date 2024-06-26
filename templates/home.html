@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Forum Platform</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h1>Welcome to the Forum Platform</h1>
-    <nav>
-        <ul>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
-            <form action="/login-guest" method="post">
-        <button type="submit">Browse as Guest</button>
-    </form>
-        </ul>
-    </nav>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Hoş Geldiniz</title>
+    <link rel="stylesheet" href="static/home.css">
+  </head>
+  <body>
+    <header><h1>BilTek'e Hoş Geldiniz</h1></header>
+    <section>
+      <div>
+        <button><a href="/login">Giriş</a></button>
+        <button><a href="/register">Kayıt Ol</a></button>
+        <form action="/login-guest" method="post">
+          <button type="submit"><u>Misafir Girişi</u></button>
+        </form>
+      </div>
+    </section>
+  </body>
 </html>
-
