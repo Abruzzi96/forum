@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages</title>
-    <link rel="stylesheet" href="/static/messages.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div id="messages-container" role="main">
-        <h1>Gelen Kutusu</h1>
+        <h1>Inbox</h1>
         <div id="message-list" aria-live="polite" aria-relevant="additions"></div>
         <form id="message-form" onsubmit="sendMessage(event)">
-            <label for="recipient">Alıcı:</label>
+            <label for="recipient">Recipient:</label>
             <input type="text" id="recipient" name="recipient" placeholder="Recipient" required aria-required="true">
-            <label for="message-content">Mesaj:</label>
+            <label for="message-content">Message:</label>
             <textarea id="message-content" name="message-content" placeholder="Write your message..." required aria-required="true"></textarea>
             <button type="submit">Send</button>
         </form>

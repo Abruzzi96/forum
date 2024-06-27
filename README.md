@@ -1,3 +1,8 @@
+//// WILL  DO ////<br />
+<br />
+CSS
+<br />
+<br />
 //// MIGHT IMPROVE ////<br />
 -- konularda vote degistirilemiyo comments gibi<br />
 ?? guest yorum yapmaya calistiginda izin verilmiyo no error handle<br />

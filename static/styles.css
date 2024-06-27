@@ -1,13 +1,326 @@
+/* General styles */
 body {
-    font-family: Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+  color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
+h1, h2, h3 {
+  color: #1a1a1a;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  margin-left: 80px;
+}
+
+p {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  margin-left: 80px;
+}
+
+a {
+  color: #3a7bd5;
+  text-decoration: none;
+  margin-right: 80px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin-left: 80px;
+}
+
+ul li {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+/* Navigation */
 nav ul {
-    list-style-type: none;
-    padding: 0;
+  list-style-type: none;
+  padding: 0;
 }
 
 nav ul li {
-    display: inline;
-    margin-right: 10px;
+  display: inline;
+  margin-right: 10px;
+}
+
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 100px;
+  position: relative;
+  height: 600px;
+  margin-left: 30px;
+}
+
+header h1 {
+  font-size: 2.5em;
+  color: #e0e0e0;
+  text-shadow: 2px 2px #000;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  margin-top: 350px;
+  margin-left: 30px;
+}
+
+header::before {
+  content: "";
+  background-image: url('image.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Sections */
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  margin-left: 50px;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Buttons */
+button {
+  background-color: #3a7bd5;
+  color: white;
+  padding: 15px 32px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s;
+  width: 80%;
+}
+
+button a {
+  color: white;
+  text-decoration: none;
+}
+
+button:hover {
+  background-color: #2e5c99;
+  transform: translateY(-2px);
+}
+
+form button {
+  background-color: transparent;
+  color: #3a7bd5;
+  border: 2px solid #3a7bd5;
+  padding: 15px 32px;
+  margin: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+form button:hover {
+  background-color: #3a7bd5;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Forms */
+form {
+  margin-bottom: 20px;
+  display: grid;
+  gap: 10px;
+  margin-left: 80px;
+}
+
+form input[type="text"],
+form textarea,
+form select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 80%;
+  box-sizing: border-box;
+  margin-left: 80px;
+}
+
+form input[type="text"],
+form textarea {
+  grid-column: span 1;
+}
+
+form select {
+  width: 80%;
+  margin-left: 80px;
+}
+
+/* User and thread info boxes */
+.user-info-box, .threads-list-box {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  margin-left: 80px;
+  width: calc(90% - 160px);
+}
+
+/* Messages */
+#messages-container {
+  padding: 20px;
+  margin: 40px auto;
+  width: calc(100% - 160px);
+  max-width: 800px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#message-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fafafa;
+}
+
+#message-form {
+  display: grid;
+  gap: 10px;
+}
+
+#message-form label {
+  margin-bottom: 5px;
+}
+
+#message-form input[type="text"],
+#message-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#message-form button {
+  background-color: #3a7bd5;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+#message-form button:hover {
+  background-color: #2e5c99;
+  transform: translateY(-2px);
+}
+
+/* Action buttons */
+.action-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.action-buttons a {
+  display: inline-block;
+  background-color: #3a7bd5;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
+  text-decoration: none;
+  margin-left: 20px;
+}
+
+.action-buttons a:hover {
+  background-color: #2e5c99;
+  transform: translateY(-2px);
+}
+
+/* Comments */
+.comment-box {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  margin-left: 80px;
+  width: calc(90% - 160px);
+}
+
+.comment-box p {
+  margin: 0;
+  padding: 5px 0;
+}
+
+.comment-box form {
+  display: flex;
+  gap: 10px;
+}
+
+.comment-box button {
+  width: auto;
+  margin-left: 0;
+}
+
+/* Specific page styles */
+section.login, section.register {
+  max-width: 400px;
+  width: 100%;
+}
+
+h1.login, h1.register {
+  margin-bottom: 60px;
+  padding: 80px;
+  border-radius: 10px;
+  margin-right: 40px;
+  width: 27%;
+  height: 300px;
+  margin-top: 40px;
+  background-size: center;
+  background-position: center;
+}
+
+h1.login {
+  background-image: url('user.jpg');
+}
+
+h1.register {
+  background-image: url('register.jpg');
 }
