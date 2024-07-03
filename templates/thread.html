@@ -6,47 +6,43 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>{{.Thread.Title}}</h1>
-    <p>Created by: {{.Username}}</p>
-    <p>{{.Thread.Description}}</p>
-    <h3>Categories:</h3>
-    <ul>
-        {{ range .Categories }}
-        <li>{{ . }}</li>
-        {{ end }}
-    </ul>
-    <h2>Comments</h2>
-    {{range .Comments}}
-    <div>
-        <p>{{.Content}} - by {{.Username}}</p>
-        <p>Likes: {{.Likes}}, Dislikes: {{.Dislikes}}</p>
-        <form method="post" action="/comment-like-dislike" aria-label="Like or dislike this comment">
-            <input type="hidden" name="comment_id" value="{{.ID}}">
-            <input type="hidden" name="thread_id" value="{{$.Thread.ID}}">
-            <button type="submit" name="like_type" value="1" aria-label="Like this comment">Like</button>
-            <button type="submit" name="like_type" value="-1" aria-label="Dislike this comment">Dislike</button>
+    <section class="thread">
+        <h1>{{.Thread.Title}}</h1>
+        <p>Created by: {{.Username}}</p>
+        <p>{{.Thread.Description}}</p>
+        <h3>Categories:</h3>
+        <ul>
+            {{range .Categories}}
+            <li>{{.}}</li>
+            {{end}}
+        </ul>
+        <h2>Comments</h2>
+        {{range .Comments}}
+        <div class="comment-box">
+            <p>{{.Content}} - by {{.Username}}</p>
+            <p>Likes: {{.Likes}}, Dislikes: {{.Dislikes}}</p>
+            <form method="post" action="/comment-like-dislike">
+                <input type="hidden" name="comment_id" value="{{.ID}}">
+                <input type="hidden" name="thread_id" value="{{$.Thread.ID}}">
+                <button type="submit" name="like_type" value="1">Like</button>
+                <button type="submit" name="like_type" value="-1">Dislike</button>
+            </form>
+        </div>
+        {{end}}
+        <form method="post" action="/comment">
+            <input type="hidden" name="thread_id" value="{{.Thread.ID}}">
+            <textarea name="comment" placeholder="Write a comment..." required></textarea>
+            <button type="submit">Post Comment</button>
         </form>
-    </div>
-    {{end}}
-
-    <!-- Comment Form -->
-    <form method="post" action="/comment" aria-label="Post a comment">
-        <input type="hidden" name="thread_id" value="{{.Thread.ID}}">
-        <label for="comment" class="visually-hidden">Write a comment</label>
-        <textarea id="comment" name="comment" placeholder="Write a comment..." required></textarea>
-        <button type="submit">Post Comment</button>
-    </form>
-
-    <div aria-live="polite" aria-atomic="true">
         <p>Likes: {{.Thread.Likes}}</p>
         <p>Dislikes: {{.Thread.Dislikes}}</p>
-    </div>
-    {{if not .IsGuest}}
-    <form method="post" action="/like-dislike" aria-label="Like or dislike this thread">
-        <input type="hidden" name="thread_id" value="{{.Thread.ID}}">
-        <button type="submit" name="like_type" value="1" aria-label="Like this thread">Like</button>
-        <button type="submit" name="like_type" value="-1" aria-label="Dislike this thread">Dislike</button>
-    </form>
-    {{end}}
+        {{if not .IsGuest}}
+        <form method="post" action="/like-dislike">
+            <input type="hidden" name="thread_id" value="{{.Thread.ID}}">
+            <button type="submit" name="like_type" value="1">Like</button>
+            <button type="submit" name="like_type" value="-1">Dislike</button>
+        </form>
+        {{end}}
+    </section>
 </body>
 </html>
