@@ -16,7 +16,65 @@ import (
     "strconv"
     "encoding/json"
     "strings"
+
+    "golang.org/x/oauth2"
+    "golang.org/x/oauth2/google"
 )
+
+var (
+    googleOauthConfig = &oauth2.Config{
+        RedirectURL:  "http://localhost:8080/auth/google/callback",
+        ClientID:     "883697810417-1stn1o4ced57v6vfcdd1gftc0cbuecc0.apps.googleusercontent.com",
+        ClientSecret: "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",
+        Scopes:       []string{"profile", "email"},
+        Endpoint:     google.Endpoint,
+    }
+
+    githubOauthConfig = &oauth2.Config{
+        RedirectURL:  "http://localhost:8080/auth/github/callback",
+        ClientID:     "Ov23ligGUMDo1KXwmKSg",
+        ClientSecret: "57ff69152263a05b950645a4b7f1c5bb31516756",
+        Scopes:       []string{"user:email"},
+        Endpoint:     oauth2.Endpoint{
+            AuthURL:  "https://github.com/login/oauth/authorize",
+            TokenURL: "https://github.com/login/oauth/access_token",
+        },
+    }
+)
+
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+    url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+    http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+    code := r.URL.Query().Get("code")
+    token, err := googleOauthConfig.Exchange(r.Context(), code)
+    if err != nil {
+        http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
+        return
+    }
+
+    // Use token.AccessToken to fetch user info or perform actions
+    fmt.Fprintf(w, "Access Token: %s", token.AccessToken)
+}
+
+func handleGithubLogin(w http.ResponseWriter, r *http.Request) {
+    url := githubOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+    http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
+    code := r.URL.Query().Get("code")
+    token, err := githubOauthConfig.Exchange(r.Context(), code)
+    if err != nil {
+        http.Error(w, fmt.Sprintf("Failed to exchange token: %v", err), http.StatusInternalServerError)
+        return
+    }
+
+    // Use token.AccessToken to fetch user info or perform actions
+    fmt.Fprintf(w, "Access Token: %s", token.AccessToken)
+}
 
 var db *sql.DB
 var jwtKey = []byte("your_secret_key") // Keep this key secret
@@ -78,6 +136,12 @@ func main() {
     defer db.Close()
     
 	http.HandleFunc("/", serveHome)
+
+    http.HandleFunc("/auth/google/login", handleGoogleLogin)
+    http.HandleFunc("/auth/google/callback", handleGoogleCallback)
+    http.HandleFunc("/auth/github/login", handleGithubLogin)
+    http.HandleFunc("/auth/github/callback", handleGithubCallback)
+
     http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/login", serveLogin)
 	http.HandleFunc("/register", serveRegister)
