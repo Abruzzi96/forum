@@ -19,6 +19,7 @@ import (
 
     "golang.org/x/oauth2"
     "golang.org/x/oauth2/google"
+    "github.com/gorilla/sessions"
 )
 
 var (
@@ -40,7 +41,26 @@ var (
             TokenURL: "https://github.com/login/oauth/access_token",
         },
     }
+
+    store = sessions.NewCookieStore([]byte("your-secret-key"))
 )
+
+func handleProtectedEndpoint(w http.ResponseWriter, r *http.Request) {
+    session, err := store.Get(r, "session-name")
+    if err != nil {
+        http.Error(w, "Failed to get session", http.StatusInternalServerError)
+        return
+    }
+
+    accessToken, ok := session.Values["accessToken"].(string)
+    if !ok {
+        http.Error(w, "Access token not found in session", http.StatusInternalServerError)
+        return
+    }
+
+    // Use accessToken to make authenticated requests or perform actions
+    fmt.Fprintf(w, "Access Token: %s", accessToken)
+}
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
     url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
@@ -55,8 +75,17 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Use token.AccessToken to fetch user info or perform actions
-    fmt.Fprintf(w, "Access Token: %s", token.AccessToken)
+    // Store token in session
+    session, err := store.Get(r, "session-name")
+    if err != nil {
+        http.Error(w, "Failed to get session", http.StatusInternalServerError)
+        return
+    }
+    session.Values["accessToken"] = token.AccessToken
+    session.Save(r, w)
+
+    // Redirect to another endpoint after successful login
+    http.Redirect(w, r, "/index", http.StatusSeeOther)
 }
 
 func handleGithubLogin(w http.ResponseWriter, r *http.Request) {
@@ -72,8 +101,17 @@ func handleGithubCallback(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Use token.AccessToken to fetch user info or perform actions
-    fmt.Fprintf(w, "Access Token: %s", token.AccessToken)
+    // Store token in session
+    session, err := store.Get(r, "session-name")
+    if err != nil {
+        http.Error(w, "Failed to get session", http.StatusInternalServerError)
+        return
+    }
+    session.Values["accessToken"] = token.AccessToken
+    session.Save(r, w)
+
+    // Redirect to another endpoint after successful login
+    http.Redirect(w, r, "/index", http.StatusSeeOther)
 }
 
 var db *sql.DB
