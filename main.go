@@ -20,30 +20,37 @@ import (
     "golang.org/x/oauth2"
     "golang.org/x/oauth2/google"
     "github.com/gorilla/sessions"
+    "github.com/joho/godotenv"
 )
 
 var (
     googleOauthConfig = &oauth2.Config{
         RedirectURL:  "http://localhost:8080/auth/google/callback",
-        ClientID:     "883697810417-1stn1o4ced57v6vfcdd1gftc0cbuecc0.apps.googleusercontent.com",
-        ClientSecret: "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",
+        ClientID:     ClientID,
+        ClientSecret: ClientSecret,
         Scopes:       []string{"profile", "email"},
         Endpoint:     google.Endpoint,
     }
 
     githubOauthConfig = &oauth2.Config{
         RedirectURL:  "http://localhost:8080/auth/github/callback",
-        ClientID:     "Ov23ligGUMDo1KXwmKSg",
-        ClientSecret: "57ff69152263a05b950645a4b7f1c5bb31516756",
+        ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+        ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
         Scopes:       []string{"user:email"},
-        Endpoint:     oauth2.Endpoint{
-            AuthURL:  "https://github.com/login/oauth/authorize",
-            TokenURL: "https://github.com/login/oauth/access_token",
-        },
+        Endpoint:     github.Endpoint,
     }
-
-    store = sessions.NewCookieStore([]byte("your-secret-key"))
 )
+
+func load_env() {
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
+}
+
+load_env()
+    var ClientID = os.Getenv("GOOGLE_CLIENT_ID")
+    var ClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
 
 func handleProtectedEndpoint(w http.ResponseWriter, r *http.Request) {
     session, err := store.Get(r, "session-name")
