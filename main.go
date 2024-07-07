@@ -22,14 +22,16 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
 )
 
 var (
-	googleOauthConfig *oauth2.Config
-	githubOauthConfig *oauth2.Config
-	store             *sessions.CookieStore
+	googleOauthConfig   *oauth2.Config
+	githubOauthConfig   *oauth2.Config
+	facebookOauthConfig *oauth2.Config
+	store               *sessions.CookieStore
 )
 
 var db *sql.DB
@@ -399,6 +401,58 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/index", http.StatusSeeOther)
 }
 
+func handleFacebookLogin(w http.ResponseWriter, r *http.Request) {
+	url := facebookOauthConfig.AuthCodeURL("")
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleFacebookCallback(w http.ResponseWriter, r *http.Request) {
+	code := r.FormValue("code")
+	token, err := facebookOauthConfig.Exchange(r.Context(), code)
+	if err != nil {
+		log.Printf("Facebook token exchange error: %v", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	resp, err := http.Get(fmt.Sprintf("https://graph.facebook.com/me?access_token=%s&fields=id,name,email", token.AccessToken))
+	if err != nil {
+		log.Printf("Get: %s\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	defer resp.Body.Close()
+
+	var user struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		log.Printf("Decode: %s\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	// Store the user data in the session
+	session, err := store.Get(r, "session-name")
+	if err != nil {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		log.Printf("Session error: %v", err)
+		return
+	}
+	session.Values["user"] = user
+	if err := session.Save(r, w); err != nil {
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		log.Printf("Session save error: %v", err)
+		return
+	}
+
+	// Redirect to profile page after successful login
+	http.Redirect(w, r, "/profile", http.StatusSeeOther)
+}
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -418,6 +472,13 @@ func init() {
 		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		Scopes:       []string{"user:email"},
 		Endpoint:     github.Endpoint,
+	}
+	facebookOauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("FACEBOOK_KEY"),
+		ClientSecret: os.Getenv("FACEBOOK_SECRET"),
+		RedirectURL:  "http://localhost:8080/auth/facebook/callback",
+		Endpoint:     facebook.Endpoint,
+		Scopes:       []string{"email"},
 	}
 	store = sessions.NewCookieStore([]byte("SESSION_SECRET"))
 }
@@ -490,6 +551,9 @@ func main() {
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
 	http.HandleFunc("/auth/google/login", handleGoogleLogin)
 	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
+	http.HandleFunc("/auth/facebook", handleFacebookLogin)
+	http.HandleFunc("/auth/facebook/callback", handleFacebookCallback)
+
 	http.HandleFunc("/protected", handleProtectedEndpoint)
 	http.HandleFunc("/profile", handleProfile)
 	http.HandleFunc("/userProfile", userProfileHandler(db))
