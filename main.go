@@ -21,29 +21,15 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
-	_ "github.com/joho/godotenv/autoload"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
 )
 
 var (
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/auth/google/callback",
-		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
-		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
-		Scopes:       []string{"profile", "email"},
-		Endpoint:     google.Endpoint,
-	}
-
-	githubOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/auth/github/callback",
-		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
-		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
-		Scopes:       []string{"user:email"},
-		Endpoint:     github.Endpoint,
-	}
-	store = sessions.NewCookieStore([]byte("SESSION_SECRET"))
+	googleOauthConfig *oauth2.Config
+	githubOauthConfig *oauth2.Config
+	store             *sessions.CookieStore
 )
 
 var db *sql.DB
@@ -70,6 +56,73 @@ type Message struct {
 	Recipient string    `json:"recipient"`
 	Content   string    `json:"content"`
 	Time      time.Time `json:"time"`
+}
+
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	log.Printf("Google callback code: %s", code)
+
+	// Exchange code for access token
+	token, err := googleOauthConfig.Exchange(r.Context(), code)
+	if err != nil {
+		http.Error(w, "Failed to exchange Google token", http.StatusInternalServerError)
+		log.Printf("Google token exchange error: %v", err)
+		return
+	}
+
+	// Store token in session
+	session, err := store.Get(r, "session-name")
+	if err != nil {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		log.Printf("Session error: %v", err)
+		return
+	}
+	session.Values["googleAccessToken"] = token.AccessToken
+	if err := session.Save(r, w); err != nil {
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		log.Printf("Session save error: %v", err)
+		return
+	}
+
+	// Redirect to profile page after successful login
+	http.Redirect(w, r, "/index", http.StatusSeeOther)
+}
+
+func handleProfile(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session-name")
+	if err != nil {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		log.Printf("Session error: %v", err)
+		return
+	}
+
+	// Check for Google access token in session
+	googleAccessToken, googleOK := session.Values["googleAccessToken"].(string)
+
+	// Check for GitHub access token in session
+	githubAccessToken, githubOK := session.Values["githubAccessToken"].(string)
+
+	// Example: Using Google access token
+	if googleOK {
+		// Use googleAccessToken to fetch user profile data from Google APIs if needed
+		fmt.Fprintf(w, "Google Profile Page\nAccess Token: %s", googleAccessToken)
+		return
+	}
+
+	// Example: Using GitHub access token
+	if githubOK {
+		// Use githubAccessToken to fetch user profile data from GitHub APIs if needed
+		fmt.Fprintf(w, "GitHub Profile Page\nAccess Token: %s", githubAccessToken)
+		return
+	}
+
+	http.Error(w, "Access token not found in session", http.StatusInternalServerError)
+	log.Println("Access token not found in session")
 }
 
 func handleProtectedEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -128,8 +181,24 @@ func handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file %v", err)
 	}
+
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/auth/google/callback",
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		Scopes:       []string{"profile", "email"},
+		Endpoint:     google.Endpoint,
+	}
+	githubOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/auth/github/callback",
+		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+		Scopes:       []string{"user:email"},
+		Endpoint:     github.Endpoint,
+	}
+	store = sessions.NewCookieStore([]byte("SESSION_SECRET"))
 }
 
 // database load
@@ -174,7 +243,10 @@ func main() {
 
 	http.HandleFunc("/auth/github/login", handleGitHubLogin)
 	http.HandleFunc("/auth/github/callback", handleGitHubCallback)
+	http.HandleFunc("/auth/google/login", handleGoogleLogin)
+	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
 	http.HandleFunc("/protected", handleProtectedEndpoint)
+	http.HandleFunc("/profile", handleProfile)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/login", serveLogin)
