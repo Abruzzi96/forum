@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+</head>
+<body>
+    <div>
+        <h1>Welcome, {{ .Username }}</h1>
+    </div>
+
+    <div>
+        <h2>User's Likes and Dislikes</h2>
+
+        <div>
+            <h3>User Thread Likes:</h3>
+            <ul>
+                {{ range .UserThreadLikes }}
+                <li>{{ .Title }}</li>
+                {{ end }}
+            </ul>
+        </div>
+
+        <div>
+            <h3>User Thread Dislikes:</h3>
+            <ul>
+                {{ range .UserThreadDislikes }}
+                <li>{{ .Title }}</li>
+                {{ end }}
+            </ul>
+        </div>
+
+        <div>
+            <h3>User Comment Likes:</h3>
+            <ul>
+                {{ range .UserCommentLikes }}
+                <li>{{ .Content }}</li>
+                {{ end }}
+            </ul>
+        </div>
+
+        <div>
+            <h3>User Comment Dislikes:</h3>
+            <ul>
+                {{ range .UserCommentDislikes }}
+                <li>{{ .Content }}</li>
+                {{ end }}
+            </ul>
+        </div>
+
+        <div>
+            <h3>User Threads:</h3>
+            <ul>
+                {{ range .UserThreads }}
+                <li>{{ .Title }}</li>
+                {{ end }}
+            </ul>
+        </div>
+
+        <div>
+            <h3>User Comments:</h3>
+            <ul>
+                {{ range .UserComments }}
+                <li>{{ .Content }}</li>
+                {{ end }}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

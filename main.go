@@ -46,6 +46,7 @@ type Comment struct {
 	ID       int
 	Content  string
 	Username string
+	ThreadID int
 	Likes    int
 	Dislikes int
 	UserID   int
@@ -56,6 +57,226 @@ type Message struct {
 	Recipient string    `json:"recipient"`
 	Content   string    `json:"content"`
 	Time      time.Time `json:"time"`
+}
+
+// ProfileData holds the profile information to be displayed.
+type ProfileData struct {
+	Username            string
+	UserThreadLikes     []Thread
+	UserThreadDislikes  []Thread
+	UserCommentLikes    []Comment
+	UserCommentDislikes []Comment
+	UserThreads         []Thread
+	UserComments        []Comment
+}
+
+// userProfileHandler handles the profile page logic.
+func userProfileHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Assuming userID is retrieved from session or authentication
+		userID := 1 // Replace with actual userID retrieval logic
+
+		profile, err := listProfileData(db, userID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error fetching profile data: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		tmpl, err := template.ParseFiles("templates/profile.html")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error parsing template: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		err = tmpl.Execute(w, profile)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// listProfileData retrieves and constructs ProfileData for a given userID.
+func listProfileData(db *sql.DB, userID int) (*ProfileData, error) {
+	// Fetch username
+	var username string
+	err := db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch threads liked and disliked by the user
+	userThreadLikes, err := fetchThreadsByLikeType(db, userID, 1) // 1 for likes
+	if err != nil {
+		return nil, err
+	}
+
+	userThreadDislikes, err := fetchThreadsByLikeType(db, userID, -1) // -1 for dislikes
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch comments liked and disliked by the user
+	userCommentLikes, err := fetchCommentsByLikeType(db, userID, 1) // 1 for likes
+	if err != nil {
+		return nil, err
+	}
+
+	userCommentDislikes, err := fetchCommentsByLikeType(db, userID, -1) // -1 for dislikes
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch threads and comments created by the user
+	userThreads, err := fetchUserThreads(db, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	userComments, err := fetchUserComments(db, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prepare profile data
+	profile := &ProfileData{
+		Username:            username,
+		UserThreadLikes:     userThreadLikes,
+		UserThreadDislikes:  userThreadDislikes,
+		UserCommentLikes:    userCommentLikes,
+		UserCommentDislikes: userCommentDislikes,
+		UserThreads:         userThreads,
+		UserComments:        userComments,
+	}
+
+	return profile, nil
+}
+
+// fetchThreadsByLikeType retrieves threads liked or disliked by the user based on like type.
+func fetchThreadsByLikeType(db *sql.DB, userID int, likeType int) ([]Thread, error) {
+	var query string
+	if likeType == 1 {
+		query = `
+			SELECT t.id, t.title, t.description, t.likes, t.dislikes
+			FROM threads t
+			JOIN thread_likes tl ON t.id = tl.thread_id
+			WHERE tl.user_id = ? AND tl.like_type = 1
+		`
+	} else if likeType == -1 {
+		query = `
+			SELECT t.id, t.title, t.description, t.likes, t.dislikes
+			FROM threads t
+			JOIN thread_likes tl ON t.id = tl.thread_id
+			WHERE tl.user_id = ? AND tl.like_type = -1
+		`
+	}
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var threads []Thread
+	for rows.Next() {
+		var thread Thread
+		if err := rows.Scan(&thread.ID, &thread.Title, &thread.Description, &thread.Likes, &thread.Dislikes); err != nil {
+			return nil, err
+		}
+		threads = append(threads, thread)
+	}
+
+	return threads, nil
+}
+
+// fetchCommentsByLikeType retrieves comments liked or disliked by the user based on like type.
+func fetchCommentsByLikeType(db *sql.DB, userID int, likeType int) ([]Comment, error) {
+	var query string
+	if likeType == 1 {
+		query = `
+			SELECT c.id, c.content, c.user_id, c.thread_id, c.likes, c.dislikes
+			FROM comments c
+			JOIN comment_likes cl ON c.id = cl.comment_id
+			WHERE cl.user_id = ? AND cl.like_type = 1
+		`
+	} else if likeType == -1 {
+		query = `
+			SELECT c.id, c.content, c.user_id, c.thread_id, c.likes, c.dislikes
+			FROM comments c
+			JOIN comment_likes cl ON c.id = cl.comment_id
+			WHERE cl.user_id = ? AND cl.like_type = -1
+		`
+	}
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.ThreadID, &comment.Likes, &comment.Dislikes); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
+}
+
+// fetchUserThreads retrieves threads created by the user.
+
+func fetchUserThreads(db *sql.DB, userID int) ([]Thread, error) {
+	// Implement query to fetch threads created by the user
+	query := `
+		SELECT id, title, description, likes, dislikes
+		FROM threads
+		WHERE user_id = ?
+	`
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var threads []Thread
+	for rows.Next() {
+		var thread Thread
+		if err := rows.Scan(&thread.ID, &thread.Title, &thread.Description, &thread.Likes, &thread.Dislikes); err != nil {
+			return nil, err
+		}
+		threads = append(threads, thread)
+	}
+
+	return threads, nil
+}
+
+// fetchUserComments retrieves comments created by the user.
+func fetchUserComments(db *sql.DB, userID int) ([]Comment, error) {
+	// Implement query to fetch comments created by the user
+	query := `
+		SELECT id, content, user_id, thread_id, likes, dislikes
+		FROM comments
+		WHERE user_id = ?
+	`
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.ThreadID, &comment.Likes, &comment.Dislikes); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
 }
 
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
@@ -223,6 +444,30 @@ func initDB(dataSourceName string) (*sql.DB, error) {
 	return db, nil
 }
 
+func listThreadsByUser(db *sql.DB, userID int) ([]Thread, error) {
+	threadRows, err := db.Query(`
+        SELECT id, title, description, likes, dislikes
+        FROM threads
+        WHERE user_id = ?
+    `, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer threadRows.Close()
+
+	var threads []Thread
+	for threadRows.Next() {
+		var thread Thread
+		if err := threadRows.Scan(&thread.ID, &thread.Title, &thread.Description, &thread.Likes, &thread.Dislikes); err != nil {
+			return nil, err
+		}
+
+		threads = append(threads, thread)
+	}
+
+	return threads, nil
+}
+
 func main() {
 	jwtKey = generateRandomKey(32)
 	log.Println("JWT Key:", base64.StdEncoding.EncodeToString(jwtKey))
@@ -247,6 +492,7 @@ func main() {
 	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
 	http.HandleFunc("/protected", handleProtectedEndpoint)
 	http.HandleFunc("/profile", handleProfile)
+	http.HandleFunc("/userProfile", userProfileHandler(db))
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/login", serveLogin)
@@ -776,6 +1022,7 @@ func serveCreateThread(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unauthorized access", http.StatusUnauthorized)
 			return
 		}
+		//fmt.Printf(username, userID)
 
 		// Proceed with creating the thread since the user is authenticated and not a guest
 		title := r.FormValue("title")
